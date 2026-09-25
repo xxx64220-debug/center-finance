@@ -1,0 +1,1236 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5d56">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Center Finance">
+<title>Center Finance</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f5d56'/%3E%3Cpath d='M18 40h28M18 30h28M18 20h18' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f2;--card:#ffffff;--ink:#16211f;--muted:#5d6a66;--line:#e1e5e1;--soft:#eef2ef;
+  --brand:#0f5d56;--brand-ink:#ffffff;--in:#137a3a;--out:#b42318;--pending:#8a6100;--radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0e1312;--card:#161d1b;--ink:#e6ebe9;--muted:#98a4a0;--line:#28312e;--soft:#1c2522;
+    --brand:#3aa594;--brand-ink:#04201b;--in:#4fcb7c;--out:#ff7b6c;--pending:#e2b84b;}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+html[lang=ar] body{font-family:"IBM Plex Sans Arabic",Inter,system-ui,sans-serif}
+h1,h2,h3{margin:0;line-height:1.25}
+h2{font-size:18px}
+h3{font-size:16px;margin-bottom:12px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.cur{font-size:.75em;color:var(--muted);font-weight:500}
+.muted{color:var(--muted)} .small{font-size:13px} .center{text-align:center}
+.pos{color:var(--in)} .neg{color:var(--out)} .ok{color:var(--muted)}
+.strike{text-decoration:line-through}
+[dir=rtl] .arr{display:inline-block;transform:scaleX(-1)}
+
+header.top{position:sticky;top:0;z-index:6;background:var(--brand);color:var(--brand-ink);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:8px}
+header.top .brand{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
+header.top h1{font-size:16px}
+header.top small{opacity:.85;font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtn{background:rgba(255,255,255,.14);color:inherit;border:0;border-radius:10px;min-width:40px;height:40px;font:inherit;font-weight:700;display:grid;place-items:center;cursor:pointer}
+main{max-width:720px;margin:0 auto;padding:14px 16px calc(92px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px}
+.empty{text-align:center;color:var(--muted);padding:28px 14px}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);padding:40px 0}
+.spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+nav.bottom{position:fixed;bottom:0;left:0;right:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom button{flex:1;max-width:140px;background:none;border:0;padding:7px 2px 6px;color:var(--muted);font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;min-height:58px;cursor:pointer}
+nav.bottom button.on{color:var(--brand)}
+nav.bottom button.plus svg{background:var(--brand);color:var(--brand-ink);border-radius:50%;padding:7px;width:36px;height:36px}
+.badge-n{position:absolute;top:3px;inset-inline-start:calc(50% + 5px);background:var(--out);color:#fff;border-radius:9px;font-size:10px;font-style:normal;padding:1px 5px;min-width:18px;text-align:center}
+
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;border-radius:10px;padding:9px 14px;min-height:44px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.danger{color:var(--out)}
+.btn.sm{min-height:36px;padding:5px 11px;font-size:13px}
+.btn.block{width:100%}
+.btn svg{width:16px;height:16px}
+.linkbtn{background:none;border:0;color:var(--brand);font:inherit;font-weight:600;margin-top:14px;cursor:pointer;padding:8px}
+body.busy button,body.busy .btn{opacity:.55;pointer-events:none}
+
+.fld{display:block;margin-bottom:12px}
+.fld>span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.fld em{font-style:normal;font-weight:400;opacity:.85}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px}
+textarea{resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+input[type=date]{direction:ltr}
+input.amount{font-size:30px;font-weight:700;text-align:center;direction:ltr;letter-spacing:.5px}
+input[type=file]{padding:8px;min-height:auto;background:var(--card)}
+.chk{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:500}
+.chk input{width:22px;height:22px;min-height:0;accent-color:var(--brand);flex:none}
+.seg{display:flex;background:var(--soft);border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
+.seg-b{flex:1;border:0;background:transparent;font:inherit;font-weight:700;padding:10px;border-radius:9px;color:var(--muted);min-height:44px;cursor:pointer}
+.seg-b.on.k-expense{background:var(--out);color:#fff}
+.seg-b.on.k-income{background:var(--in);color:#fff}
+.seg-b.on.k-transfer{background:var(--brand);color:var(--brand-ink)}
+.err{background:color-mix(in srgb,var(--out) 12%,transparent);color:var(--out);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-weight:500}
+.info{background:var(--soft);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.warnbox{border-color:color-mix(in srgb,var(--pending) 45%,var(--line))}
+.banner{display:block;width:100%;text-align:start;border:0;border-radius:var(--radius);padding:13px 14px;margin-bottom:12px;font:inherit;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--pending) 16%,var(--card));color:var(--pending)}
+
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.rows li:first-child{border-top:0}
+.rows li.col{display:block}
+.rowline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.grid2>*{min-width:0}
+input,select{max-width:100%}
+select{text-overflow:ellipsis}
+.grid2 .card{margin:0}
+.grid2.tight{gap:10px;margin:0}
+.stat b{display:block;font-size:18px;margin-top:4px}
+.total{font-size:30px;font-weight:700;margin:6px 0 8px}
+.big{font-size:20px}
+.bar{height:6px;background:var(--soft);border-radius:4px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:4px}
+.bar.out i{background:var(--out)} .bar.in i{background:var(--in)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:20px;padding:7px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;text-align:start;border-top:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:600;border-top:0}
+td.r,th.r{text-align:end}
+td input{min-height:40px;padding:6px 8px;font-size:16px;text-align:center;direction:ltr}
+
+.entry .e-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.entry .e-main{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.entry .e-amt{font-size:19px}
+.entry .e-desc{margin:8px 0 6px;overflow-wrap:anywhere}
+.entry .note{margin:6px 0;padding:8px 10px;background:var(--soft);border-radius:8px;font-size:13px;overflow-wrap:anywhere}
+.entry .e-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.entry .e-act{display:flex;gap:10px;margin-top:12px}
+.entry .e-act .btn{flex:1}
+.entry.rejected,.entry.void{opacity:.8}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.pill.pending{color:var(--pending);background:color-mix(in srgb,var(--pending) 15%,transparent)}
+.pill.approved{color:var(--in);background:color-mix(in srgb,var(--in) 13%,transparent)}
+.pill.rejected{color:var(--out);background:color-mix(in srgb,var(--out) 12%,transparent)}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.srow-r{display:flex;align-items:center;gap:8px;flex:none}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 14px;text-align:start;font:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:8px;min-height:104px}
+.tile svg{width:24px;height:24px;color:var(--brand)}
+.tile b{font-size:15px}
+.tile span{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+
+.login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.login .card{width:100%;max-width:380px;padding:24px 20px;text-align:center}
+.login form{text-align:start;margin-top:20px}
+.logo{width:56px;height:56px;margin:0 auto 12px;border-radius:14px;background:var(--brand);color:#fff;display:grid;place-items:center}
+.logo svg{width:30px;height:30px}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(74px + env(safe-area-inset-bottom));max-width:540px;margin:0 auto;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:40}
+.toast.show{opacity:1;transform:none}
+.toast.err{background:var(--out);color:#fff}
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:30}
+.modal-wrap.open{display:flex}
+.modal{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+@media (min-width:640px){.modal-wrap{align-items:center}.modal{border-radius:18px}}
+.btns{display:flex;gap:10px;margin-top:6px}
+.btns .btn{flex:1}
+.sum{list-style:none;padding:0;margin:0 0 14px}
+.sum li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line)}
+.sum li:first-child{border-top:0}
+.sum li span:first-child{color:var(--muted);flex:none}
+.sum li span:last-child{text-align:end;overflow-wrap:anywhere}
+.sum-amt{text-align:center;font-size:32px;font-weight:700;margin:4px 0 12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="modal-wrap" id="modalWrap"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+/* ================= CONFIG ================= */
+const SB_URL = 'https://lnzirpcsunwajdnwoalc.supabase.co';
+const SB_KEY = 'sb_publishable_MLXhjTxVSavrd93MzFCpag_U5O4xQ5D';
+const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+/* ================= TEXT (EN / AR) ================= */
+const T = {
+en: {
+  cur:'EGP', app:'Center Finance', tagline:'Income, expenses and cash for the center',
+  email:'Username', password:'Password', signIn:'Sign in', signOut:'Sign out',
+  inactiveTitle:'Waiting for activation', inactiveBody:'Your account exists, but the owner has not activated it yet.', checkAgain:'Check again',
+  loading:'Loading…', refresh:'Refresh',
+  nav_home:'Home', nav_pending:'Approve', nav_add:'Add', nav_entries:'Entries', nav_more:'More', nav_mine:'My entries',
+  k_expense:'Expense', k_income:'Income', k_transfer:'Transfer',
+  s_pending:'Pending', s_approved:'Approved', s_rejected:'Rejected', s_void:'Voided',
+  role_owner:'Owner', role_staff:'Staff',
+  amount:'Amount', date:'Date', account:'Account', paidFrom:'Paid from', receivedInto:'Received into', fromAccount:'From account', toAccount:'To account',
+  category:'Category', teacher:'Teacher', paidTo:'Paid to', receivedFrom:'Received from', description:'Description',
+  reference:'Receipt / reference no.', receipt:'Receipt photo', optional:'optional', choose:'Choose…', descHint:'What exactly was it for?',
+  review:'Review & save', confirmTitle:'Check before saving', confirmSave:'Yes, save', cancel:'Cancel', save:'Save', edit:'Edit', add:'Add',
+  dupWarn:'Possible duplicate. There is already an entry with the same date, amount and account:',
+  savedPending:'Saved as #{0}. Waiting for approval.', savedApproved:'Saved as #{0}.',
+  willBePending:'Entries you save go to the owner for approval.',
+  dayClosed:'Today is already closed. New entries can only be dated after {0}.',
+  v_amount:'Enter a valid amount (numbers only, up to 2 decimals).', v_date:'Choose a date that is not in the future.',
+  v_closed:'That date is closed. Use a date after {0}.', v_account:'Choose the account.', v_to:'Choose a different destination account.',
+  v_category:'Choose a category.', v_teacher:'Choose the teacher.', v_desc:'Write a short description (at least 3 characters).',
+  v_file:'The receipt file is too large (max 5 MB).',
+  entryBy:'By {0}', receiptBtn:'Receipt', reasonLbl:'Reason',
+  approve:'Approve', reject:'Reject', voidBtn:'Void',
+  rejectTitle:'Reject entry #{0}', rejectHint:'Tell the staff member why, so they can re-enter it correctly.',
+  voidTitle:'Void entry #{0}', voidHint:'Voiding keeps the record but removes it from every balance and report.',
+  reason:'Reason', approvedMsg:'Approved #{0}.', rejectedMsg:'Rejected #{0}.', voidedMsg:'Voided #{0}.',
+  noPending:'Nothing is waiting for approval.', pendingBanner:'{0} entries waiting for your approval',
+  balances:'Balances', now:'now', total:'Total',
+  todayIncome:'Income today', todayExpense:'Expenses today', monthIncome:'Income this month', monthExpense:'Expenses this month', monthNet:'Net this month',
+  closedUntil:'Books closed up to {0}', notClosed:'No day has been closed yet', closeDay:'Close day',
+  closeReminder:'Count the money and close the day so past entries are locked.',
+  startTitle:'Start here', startBody:'Record how much money is in each account right now, using the "Opening balance" category.', startBtn:'Record opening balance',
+  from:'From', to:'To', kindAll:'All types', statusActive:'Approved + pending', statusAll:'All statuses',
+  allAccounts:'All accounts', allCategories:'All categories', search:'Search description, name, no.', apply:'Apply', exportCsv:'Export CSV',
+  countRows:'{0} entries', noEntries:'No entries match.', noMine:'You have not recorded anything yet.',
+  closeTitle:'Close the day', closeIntro:'Count the real money in each account. After closing, entries on or before this date are locked.',
+  closeDate:'Day to close', expected:'Expected', counted:'Counted', difference:'Difference', note:'Note', noteHint:'Required if there is a difference',
+  postAdj:'Record differences as cash over / short so the books match the count',
+  pendingBlock:'{0} pending entries on or before this date. Approve or reject them first.', goApprove:'Go to approvals',
+  closeConfirm:'Close {0}?', closeWarn:'After closing, entries on or before {0} cannot be added or voided.', closedOk:'{0} closed.',
+  alreadyClosedInfo:'This date is already closed. Choose a later date.', history:'Recent closes', skip:'skip',
+  v_count:'Enter the counted amount for {0}.', v_countBad:'The counted amount for {0} is not valid.', v_note:'There is a difference. Write a note explaining it.',
+  reportsTitle:'Reports', thisMonth:'This month', lastMonth:'Last month', thisYear:'This year',
+  income:'Income', expenses:'Expenses', net:'Net', byIncome:'Income by category', byExpense:'Expenses by category',
+  notInPnl:'Not counted as income or expense', accountsMove:'Accounts in this period', moneyIn:'In', moneyOut:'Out', closing:'Balance at end',
+  teachersTitle:'Teacher settlement', collected:'Collected', centerShare:'Center share', teacherDue:'Teacher share', paid:'Paid out', owed:'Still owed to teacher',
+  owedHint:'"Still owed" counts everything up to the end date.', last12:'Last 12 months', month:'Month', nothing:'Nothing in this period.',
+  settings:'Settings', audit:'Audit log', reports:'Reports',
+  moreClose:'Count cash and lock the day', moreReports:'Profit, categories, teachers', moreSettings:'Accounts, categories, teachers, team', moreAudit:'Every change, who and when',
+  set_accounts:'Accounts', set_categories:'Categories', set_teachers:'Teachers', set_team:'Team',
+  name:'Name (English)', nameAr:'Name (Arabic)', accKind:'Type',
+  ak_cash:'Cash', ak_instapay:'InstaPay', ak_wallet:'Mobile wallet', ak_bank:'Bank', ak_other:'Other',
+  allowNegative:'Allow negative balance', active:'Active', inactive:'Inactive', sortOrder:'Order in lists',
+  newAccount:'New account', editAccount:'Edit account',
+  catKind:'Type', teacherLink:'Teacher link', tl_none:'No teacher', tl_optional:'Teacher optional',
+  tl_collection:'Collected for a teacher (settlement)', tl_payout:'Paid to a teacher (settlement)',
+  ownerOnly:'Owner only', inPnl:'Counts in income / expense reports', systemLocked:'System category: only the names can change.',
+  newCategory:'New category', editCategory:'Edit category',
+  tName:'Teacher name', phone:'Phone', subject:'Subject', share:'Center share %',
+  shareHint:'Applies to new collections only. Past entries keep the % they were recorded with.',
+  newTeacher:'New teacher', editTeacher:'Edit teacher',
+  fullName:'Full name', role:'Role', addStaff:'Add staff member', setPwd:'Set password', newPwd:'New password (at least 8 characters)',
+  pwdSet:'Password updated.', staffAdded:'Staff member added. Give them their username and password.', saved:'Saved.', you:'(you)',
+  staffEmailHint:'Letters, numbers and dots only, e.g. mona.ahmed. They sign in with this username and password.',
+  auditIntro:'Every change, who made it and when. This log cannot be edited.', system:'System',
+  tbl_transactions:'Entry', tbl_accounts:'Account', tbl_categories:'Category', tbl_teachers:'Teacher', tbl_profiles:'User', tbl_day_closes:'Day close', tbl_cash_counts:'Cash count',
+  act_INSERT:'added', act_UPDATE:'changed', act_DELETE:'deleted',
+  err_not_active:'Your account is not active.', err_bad_kind:'Invalid entry type.', err_transfer_owner_only:'Only the owner can record transfers.',
+  err_amount_positive:'Amount must be more than zero.', err_amount_decimals:'Amount can have at most 2 decimals.', err_amount_too_large:'Amount is too large.',
+  err_date_required:'Date is required.', err_date_future:'The date cannot be in the future.', err_closed_period:'Books are closed up to {0}. Use a later date.',
+  err_desc_required:'Write a short description (at least 3 characters).', err_category_owner_only:'Only the owner can use this category.',
+  err_bad_receipt:'The receipt upload is invalid. Try again.', err_account_inactive:'Choose an active account.', err_to_account_inactive:'Choose an active destination account.',
+  err_same_account:'From and to accounts must be different.', err_category_inactive:'Choose an active category.', err_category_kind_mismatch:'The category does not match the entry type.',
+  err_teacher_required:'This category needs a teacher.', err_teacher_not_allowed:'This category cannot be linked to a teacher.', err_teacher_inactive:'Choose an active teacher.',
+  err_system_category:'This category is used automatically when closing a day.', err_no_edit:'Recorded entries cannot be edited. Void it and record a new one.',
+  err_no_delete:'Deleting is not allowed. Records are kept for the audit trail.', err_owner_only:'Only the owner can do this.', err_bad_status_change:'This change is not allowed.',
+  err_void_closed:'This entry is in a closed day (up to {0}). Record a correction entry instead.',
+  err_negative_balance:'"{0}" would go negative ({1}). Check the amount, or record the missing income first.',
+  err_not_pending:'This entry is no longer pending. Refresh the list.', err_reason_required:'Write a reason (at least 3 characters).', err_not_approved:'Only approved entries can be voided.',
+  err_close_future:'You can only close today or an earlier day.', err_already_closed:'Already closed up to {0}.',
+  err_pending_exist:'{0} pending entries on or before this date. Approve or reject them first.', err_count_missing:'Enter the counted amount for: {0}',
+  err_bad_count:'A counted amount is not valid.', err_diff_note_required:'There is a difference. Write a note explaining it.', err_bad_range:'Choose a valid date range.',
+  err_account_has_balance:'This account still holds money. Move the balance before deactivating it.', err_system_category_locked:'System categories can only be renamed.',
+  err_category_in_use:'This category already has entries, so its type and teacher link cannot change.', err_cannot_change_self:'You cannot remove your own owner access.',
+  err_name_required:'Enter a name.', err_share_range:'Center share must be between 0 and 100.', err_bad_role:'Invalid role.', err_not_found:'Not found. Refresh and try again.',
+  err_password_short:'Password must be at least 8 characters.', err_bad_email:'Enter a valid username (at least 3 letters, numbers or dots).', err_sign_in_again:'Please sign in again.',
+  err_login:'Wrong username or password.', err_already_exists:'That name or username already exists.', err_network:'Can\'t reach the server. Nothing was saved. If you opened this file from the chat or a file viewer, open it from its web address instead.',
+  notHosted:'This page was opened as a file preview, which blocks it from connecting. Open it from its web address (for example your github.io link) to sign in.',
+  err_server_not_configured:'The staff service is not configured.'
+},
+ar: {
+  cur:'ج.م', app:'حسابات السنتر', tagline:'الإيرادات والمصروفات والخزنة',
+  email:'اسم المستخدم', password:'كلمة المرور', signIn:'تسجيل الدخول', signOut:'خروج',
+  inactiveTitle:'في انتظار التفعيل', inactiveBody:'حسابك موجود لكن المالك لم يفعّله بعد.', checkAgain:'تحقق مرة أخرى',
+  loading:'جارٍ التحميل…', refresh:'تحديث',
+  nav_home:'الرئيسية', nav_pending:'الموافقات', nav_add:'إضافة', nav_entries:'القيود', nav_more:'المزيد', nav_mine:'قيودي',
+  k_expense:'مصروف', k_income:'إيراد', k_transfer:'تحويل',
+  s_pending:'قيد المراجعة', s_approved:'معتمد', s_rejected:'مرفوض', s_void:'ملغى',
+  role_owner:'المالك', role_staff:'موظف',
+  amount:'المبلغ', date:'التاريخ', account:'الحساب', paidFrom:'مدفوع من', receivedInto:'مستلم في', fromAccount:'من حساب', toAccount:'إلى حساب',
+  category:'البند', teacher:'المدرس', paidTo:'مدفوع إلى', receivedFrom:'مستلم من', description:'الوصف',
+  reference:'رقم الإيصال / المرجع', receipt:'صورة الإيصال', optional:'اختياري', choose:'اختر…', descHint:'ما الغرض بالتحديد؟',
+  review:'مراجعة وحفظ', confirmTitle:'راجع قبل الحفظ', confirmSave:'نعم، احفظ', cancel:'إلغاء', save:'حفظ', edit:'تعديل', add:'إضافة',
+  dupWarn:'احتمال تكرار: يوجد قيد بنفس التاريخ والمبلغ والحساب:',
+  savedPending:'تم الحفظ برقم #{0}. في انتظار الموافقة.', savedApproved:'تم الحفظ برقم #{0}.',
+  willBePending:'القيود التي تحفظها تذهب للمالك للموافقة.',
+  dayClosed:'اليوم مُقفل بالفعل. القيود الجديدة يجب أن تكون بتاريخ بعد {0}.',
+  v_amount:'اكتب مبلغًا صحيحًا (أرقام فقط وحتى رقمين عشريين).', v_date:'اختر تاريخًا ليس في المستقبل.',
+  v_closed:'هذا التاريخ مُقفل. استخدم تاريخًا بعد {0}.', v_account:'اختر الحساب.', v_to:'اختر حساب وجهة مختلفًا.',
+  v_category:'اختر البند.', v_teacher:'اختر المدرس.', v_desc:'اكتب وصفًا قصيرًا (3 أحرف على الأقل).',
+  v_file:'ملف الإيصال كبير جدًا (الحد 5 ميجا).',
+  entryBy:'بواسطة {0}', receiptBtn:'الإيصال', reasonLbl:'السبب',
+  approve:'اعتماد', reject:'رفض', voidBtn:'إلغاء القيد',
+  rejectTitle:'رفض القيد #{0}', rejectHint:'اكتب السبب للموظف حتى يعيد إدخاله بشكل صحيح.',
+  voidTitle:'إلغاء القيد #{0}', voidHint:'الإلغاء يحتفظ بالسجل لكنه يستبعده من كل الأرصدة والتقارير.',
+  reason:'السبب', approvedMsg:'تم اعتماد #{0}.', rejectedMsg:'تم رفض #{0}.', voidedMsg:'تم إلغاء #{0}.',
+  noPending:'لا يوجد شيء في انتظار الموافقة.', pendingBanner:'{0} قيود في انتظار موافقتك',
+  balances:'الأرصدة', now:'الآن', total:'الإجمالي',
+  todayIncome:'إيرادات اليوم', todayExpense:'مصروفات اليوم', monthIncome:'إيرادات الشهر', monthExpense:'مصروفات الشهر', monthNet:'صافي الشهر',
+  closedUntil:'الحسابات مُقفلة حتى {0}', notClosed:'لم يتم إقفال أي يوم بعد', closeDay:'إقفال اليوم',
+  closeReminder:'اعدّ النقدية وأقفل اليوم حتى تُقفل القيود السابقة.',
+  startTitle:'ابدأ من هنا', startBody:'سجّل المبلغ الموجود في كل حساب الآن باستخدام بند "رصيد افتتاحي".', startBtn:'تسجيل رصيد افتتاحي',
+  from:'من', to:'إلى', kindAll:'كل الأنواع', statusActive:'المعتمد + قيد المراجعة', statusAll:'كل الحالات',
+  allAccounts:'كل الحسابات', allCategories:'كل البنود', search:'ابحث في الوصف أو الاسم أو الرقم', apply:'تطبيق', exportCsv:'تصدير CSV',
+  countRows:'{0} قيد', noEntries:'لا توجد قيود مطابقة.', noMine:'لم تسجل أي شيء بعد.',
+  closeTitle:'إقفال اليوم', closeIntro:'اعدّ المال الفعلي في كل حساب. بعد الإقفال تُقفل كل القيود في هذا التاريخ وما قبله.',
+  closeDate:'اليوم المراد إقفاله', expected:'المتوقع', counted:'الفعلي', difference:'الفرق', note:'ملاحظة', noteHint:'مطلوبة إذا وُجد فرق',
+  postAdj:'سجّل الفروق كزيادة / عجز حتى تطابق الحسابات العدّ الفعلي',
+  pendingBlock:'{0} قيود قيد المراجعة في هذا التاريخ أو قبله. اعتمدها أو ارفضها أولًا.', goApprove:'اذهب للموافقات',
+  closeConfirm:'إقفال {0}؟', closeWarn:'بعد الإقفال لا يمكن إضافة أو إلغاء قيود بتاريخ {0} أو قبله.', closedOk:'تم إقفال {0}.',
+  alreadyClosedInfo:'هذا التاريخ مُقفل بالفعل. اختر تاريخًا لاحقًا.', history:'آخر الإقفالات', skip:'تخطي',
+  v_count:'اكتب المبلغ الفعلي لـ {0}.', v_countBad:'المبلغ الفعلي لـ {0} غير صحيح.', v_note:'يوجد فرق. اكتب ملاحظة توضحه.',
+  reportsTitle:'التقارير', thisMonth:'هذا الشهر', lastMonth:'الشهر الماضي', thisYear:'هذه السنة',
+  income:'الإيرادات', expenses:'المصروفات', net:'الصافي', byIncome:'الإيرادات حسب البند', byExpense:'المصروفات حسب البند',
+  notInPnl:'لا يُحسب كإيراد أو مصروف', accountsMove:'الحسابات في هذه الفترة', moneyIn:'داخل', moneyOut:'خارج', closing:'الرصيد في النهاية',
+  teachersTitle:'تسوية المدرسين', collected:'المُحصّل', centerShare:'نصيب السنتر', teacherDue:'نصيب المدرس', paid:'المدفوع له', owed:'المتبقي للمدرس',
+  owedHint:'"المتبقي للمدرس" يشمل كل شيء حتى تاريخ النهاية.', last12:'آخر 12 شهرًا', month:'الشهر', nothing:'لا شيء في هذه الفترة.',
+  settings:'الإعدادات', audit:'سجل التعديلات', reports:'التقارير',
+  moreClose:'اعدّ النقدية وأقفل اليوم', moreReports:'الأرباح والبنود والمدرسون', moreSettings:'الحسابات والبنود والمدرسون والفريق', moreAudit:'كل تغيير ومن قام به ومتى',
+  set_accounts:'الحسابات', set_categories:'البنود', set_teachers:'المدرسون', set_team:'الفريق',
+  name:'الاسم (إنجليزي)', nameAr:'الاسم (عربي)', accKind:'النوع',
+  ak_cash:'نقدي', ak_instapay:'إنستاباي', ak_wallet:'محفظة موبايل', ak_bank:'بنك', ak_other:'أخرى',
+  allowNegative:'السماح برصيد سالب', active:'نشط', inactive:'غير نشط', sortOrder:'الترتيب في القوائم',
+  newAccount:'حساب جديد', editAccount:'تعديل الحساب',
+  catKind:'النوع', teacherLink:'الربط بالمدرس', tl_none:'بدون مدرس', tl_optional:'المدرس اختياري',
+  tl_collection:'مُحصّل لصالح مدرس (تسوية)', tl_payout:'مدفوع لمدرس (تسوية)',
+  ownerOnly:'للمالك فقط', inPnl:'يُحسب في تقارير الإيرادات والمصروفات', systemLocked:'بند نظام: يمكن تغيير الأسماء فقط.',
+  newCategory:'بند جديد', editCategory:'تعديل البند',
+  tName:'اسم المدرس', phone:'الهاتف', subject:'المادة', share:'نسبة السنتر %',
+  shareHint:'تُطبق على التحصيلات الجديدة فقط. القيود السابقة تحتفظ بالنسبة التي سُجلت بها.',
+  newTeacher:'مدرس جديد', editTeacher:'تعديل المدرس',
+  fullName:'الاسم بالكامل', role:'الدور', addStaff:'إضافة موظف', setPwd:'تعيين كلمة مرور', newPwd:'كلمة المرور الجديدة (8 أحرف على الأقل)',
+  pwdSet:'تم تحديث كلمة المرور.', staffAdded:'تمت إضافة الموظف. أعطه البريد وكلمة المرور.', saved:'تم الحفظ.', you:'(أنت)',
+  staffEmailHint:'حروف إنجليزية وأرقام ونقاط فقط، مثل mona.ahmed. يسجل الدخول بهذا الاسم وكلمة المرور.',
+  auditIntro:'كل تغيير ومن قام به ومتى. لا يمكن تعديل هذا السجل.', system:'النظام',
+  tbl_transactions:'قيد', tbl_accounts:'حساب', tbl_categories:'بند', tbl_teachers:'مدرس', tbl_profiles:'مستخدم', tbl_day_closes:'إقفال يوم', tbl_cash_counts:'عدّ نقدية',
+  act_INSERT:'إضافة', act_UPDATE:'تعديل', act_DELETE:'حذف',
+  err_not_active:'حسابك غير مفعّل.', err_bad_kind:'نوع القيد غير صحيح.', err_transfer_owner_only:'التحويلات للمالك فقط.',
+  err_amount_positive:'المبلغ يجب أن يكون أكبر من صفر.', err_amount_decimals:'المبلغ يقبل رقمين عشريين فقط.', err_amount_too_large:'المبلغ كبير جدًا.',
+  err_date_required:'التاريخ مطلوب.', err_date_future:'لا يمكن أن يكون التاريخ في المستقبل.', err_closed_period:'الحسابات مُقفلة حتى {0}. استخدم تاريخًا لاحقًا.',
+  err_desc_required:'اكتب وصفًا قصيرًا (3 أحرف على الأقل).', err_category_owner_only:'هذا البند للمالك فقط.',
+  err_bad_receipt:'رفع الإيصال غير صحيح. حاول مرة أخرى.', err_account_inactive:'اختر حسابًا نشطًا.', err_to_account_inactive:'اختر حساب وجهة نشطًا.',
+  err_same_account:'حساب المصدر والوجهة يجب أن يكونا مختلفين.', err_category_inactive:'اختر بندًا نشطًا.', err_category_kind_mismatch:'البند لا يطابق نوع القيد.',
+  err_teacher_required:'هذا البند يحتاج اختيار المدرس.', err_teacher_not_allowed:'هذا البند لا يُربط بمدرس.', err_teacher_inactive:'اختر مدرسًا نشطًا.',
+  err_system_category:'هذا البند يُستخدم تلقائيًا عند إقفال اليوم.', err_no_edit:'لا يمكن تعديل القيود المسجلة. ألغِ القيد وسجّل قيدًا جديدًا.',
+  err_no_delete:'الحذف غير مسموح. السجلات محفوظة للمراجعة.', err_owner_only:'هذا الإجراء للمالك فقط.', err_bad_status_change:'هذا التغيير غير مسموح.',
+  err_void_closed:'هذا القيد في يوم مُقفل (حتى {0}). سجّل قيد تصحيح بدلًا من ذلك.',
+  err_negative_balance:'رصيد "{0}" سيصبح سالبًا ({1}). راجع المبلغ أو سجّل الإيراد الناقص أولًا.',
+  err_not_pending:'هذا القيد لم يعد قيد المراجعة. حدّث القائمة.', err_reason_required:'اكتب السبب (3 أحرف على الأقل).', err_not_approved:'يمكن إلغاء القيود المعتمدة فقط.',
+  err_close_future:'يمكن إقفال اليوم أو يوم سابق فقط.', err_already_closed:'تم الإقفال بالفعل حتى {0}.',
+  err_pending_exist:'{0} قيود قيد المراجعة في هذا التاريخ أو قبله. اعتمدها أو ارفضها أولًا.', err_count_missing:'اكتب المبلغ الفعلي لـ: {0}',
+  err_bad_count:'أحد المبالغ الفعلية غير صحيح.', err_diff_note_required:'يوجد فرق. اكتب ملاحظة توضحه.', err_bad_range:'اختر فترة صحيحة.',
+  err_account_has_balance:'هذا الحساب ما زال به رصيد. انقل الرصيد قبل إيقافه.', err_system_category_locked:'بنود النظام يمكن تغيير أسمائها فقط.',
+  err_category_in_use:'هذا البند عليه قيود، لذلك لا يمكن تغيير نوعه أو ربطه بالمدرس.', err_cannot_change_self:'لا يمكنك إزالة صلاحية المالك عن نفسك.',
+  err_name_required:'اكتب الاسم.', err_share_range:'نسبة السنتر يجب أن تكون بين 0 و 100.', err_bad_role:'دور غير صحيح.', err_not_found:'غير موجود. حدّث الصفحة وحاول مرة أخرى.',
+  err_password_short:'كلمة المرور يجب أن تكون 8 أحرف على الأقل.', err_bad_email:'اكتب اسم مستخدم صحيحًا (3 أحرف أو أرقام أو نقاط على الأقل).', err_sign_in_again:'سجّل الدخول مرة أخرى.',
+  err_login:'اسم المستخدم أو كلمة المرور غير صحيحة.', err_already_exists:'هذا الاسم أو اسم المستخدم موجود بالفعل.', err_network:'تعذر الوصول للخادم. لم يتم حفظ أي شيء. إذا فتحت الملف من المحادثة أو من عارض ملفات، افتحه من رابطه على الإنترنت.',
+  notHosted:'تم فتح هذه الصفحة كمعاينة ملف، وهذا يمنعها من الاتصال. افتحها من رابطها على الإنترنت (مثل رابط github.io) لتسجيل الدخول.',
+  err_server_not_configured:'خدمة الموظفين غير مُعدّة.'
+}};
+
+/* ================= STATE ================= */
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch {} }
+};
+const S = {
+  lang: store.get('cf_lang') === 'ar' ? 'ar' : 'en',
+  user:null, me:null, accounts:[], categories:[], teachers:[], people:{}, peopleList:[],
+  lastClose:null, pendingCount:0, view:null, loading:false, busy:false,
+  form:null, formFile:null, pendingSave:null, pendingClose:null,
+  home:null, pending:[], mine:[], entries:{ filters:null, rows:[] },
+  close:{ date:null, data:null, counts:{}, history:[] },
+  report:{ from:null, to:null, data:null }, settingsTab:'accounts', audit:[]
+};
+
+/* ================= HELPERS ================= */
+const $ = s => document.querySelector(s);
+function t(k, ...p){ const s = (T[S.lang] && T[S.lang][k] !== undefined) ? T[S.lang][k] : (T.en[k] !== undefined ? T.en[k] : k); return p.length ? s.replace(/\{(\d)\}/g, (_, i) => p[+i] ?? '') : s; }
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bd = s => `<bdi>${esc(s)}</bdi>`;
+/* Usernames: "a.ghoneem" signs in as a.ghoneem@center.ghoneem.com (no email is ever sent). Full emails still work. */
+const USER_DOMAIN = 'center.ghoneem.com';
+const toLogin = s => { s = String(s || '').trim().toLowerCase(); return s.includes('@') ? s : `${s}@${USER_DOMAIN}`; };
+const showLogin = e => { e = String(e || ''); return e.endsWith('@' + USER_DOMAIN) ? e.slice(0, -(USER_DOMAIN.length + 1)) : e; };
+const validUsername = s => /^[a-z0-9][a-z0-9._-]{2,39}$/.test(s) || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+const fmtMoney = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const money = n => `<span class="num">${fmtMoney(n)}</span> <span class="cur">${t('cur')}</span>`;
+const r2 = n => Math.round(Number(n) * 100) / 100;
+const cairoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone:'Africa/Cairo', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+function addDays(iso, n){ const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+const monthStart = iso => iso.slice(0, 8) + '01';
+function fmtDate(iso){ if(!iso) return '—'; return new Date(iso + 'T12:00:00Z').toLocaleDateString(S.lang === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB', { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' }); }
+function fmtDateTime(ts){ if(!ts) return ''; return new Date(ts).toLocaleString(S.lang === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB', { timeZone:'Africa/Cairo', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
+function parseAmount(s, allowZero){
+  s = String(s ?? '').trim()
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/٫/g, '.').replace(/[,٬\s]/g, '');
+  if(!/^\d+(\.\d{1,2})?$/.test(s)) return null;
+  const n = Number(s);
+  if(n >= 10000000) return null;
+  if(n === 0 && !allowZero) return null;
+  return n;
+}
+const notHosted = () => { try { return !/^https?:$/.test(location.protocol) || location.origin === 'null'; } catch { return true; } };
+const isOwner = () => !!(S.me && S.me.role === 'owner' && S.me.active);
+const nm = x => x ? (S.lang === 'ar' && x.name_ar ? x.name_ar : x.name) : '—';
+const accById = id => S.accounts.find(a => a.id === id);
+const catById = id => S.categories.find(c => c.id === id);
+const tchById = id => S.teachers.find(x => x.id === id);
+const personName = id => !id ? t('system') : (S.people[id] ? S.people[id].full_name : (S.me && id === S.me.id ? S.me.full_name : '—'));
+const opt = (v, label, sel) => `<option value="${esc(v)}"${sel !== undefined && sel !== null && String(v) === String(sel) ? ' selected' : ''}>${esc(label)}</option>`;
+const pageHead = (title, right = '') => `<div class="phead"><h2>${esc(title)}</h2>${right}</div>`;
+const empty = msg => `<div class="card empty">${esc(msg)}</div>`;
+const loadingHtml = () => `<div class="loading"><span class="spin"></span>${t('loading')}</div>`;
+function must(res){ if(res.error) throw res.error; return res.data; }
+function errText(e){
+  const msg = String((e && (e.message || e.error_description || e.error)) || e || '').trim();
+  const m = /^([a-z_]+)(?::([\s\S]*))?$/.exec(msg);
+  if(m && T.en['err_' + m[1]] !== undefined){ const p = (m[2] || '').split('|'); return t('err_' + m[1], ...p); }
+  if(/invalid login credentials/i.test(msg)) return t('err_login');
+  if(/duplicate key|already (been )?registered|already exists/i.test(msg)) return t('err_already_exists');
+  if(/failed to fetch|networkerror|load failed/i.test(msg)) return t('err_network');
+  if(/jwt expired|invalid jwt/i.test(msg)) return t('err_sign_in_again');
+  return msg || 'Error';
+}
+function toast(msg, type = 'ok'){
+  const el = $('#toast'); el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { el.className = 'toast'; }, type === 'err' ? 6500 : 3500);
+}
+async function run(fn, errEl){
+  if(S.busy) return;
+  S.busy = true; document.body.classList.add('busy');
+  if(errEl) errEl.hidden = true;
+  try { await fn(); }
+  catch(e){ console.error(e); const m = errText(e); if(errEl && errEl.isConnected){ errEl.textContent = m; errEl.hidden = false; errEl.scrollIntoView({ block:'nearest' }); } else toast(m, 'err'); }
+  finally { S.busy = false; document.body.classList.remove('busy'); }
+}
+function openModal(html){ $('#modal').innerHTML = html; $('#modalWrap').classList.add('open'); const f = $('#modal input:not([type=hidden]),#modal textarea'); if(f && window.innerWidth > 640) f.focus(); }
+function closeModal(){ $('#modalWrap').classList.remove('open'); $('#modal').innerHTML = ''; S.pendingSave = null; S.pendingClose = null; }
+function applyLang(){ document.documentElement.lang = S.lang; document.documentElement.dir = S.lang === 'ar' ? 'rtl' : 'ltr'; document.title = t('app'); }
+
+const ICON = {
+  logo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 15h12M6 10h12M6 5h7M6 20h9"/></svg>',
+  home:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  check:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',
+  plus:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  list:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  dots:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  out:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>',
+  clip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 8"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+};
+
+/* ================= DATA LOADING ================= */
+async function loadRefs(){
+  const [a, c, tt, lc] = await Promise.all([
+    sb.from('accounts').select('*').order('sort_order').order('name'),
+    sb.from('categories').select('*').order('sort_order').order('name'),
+    sb.from('teachers').select('*').order('name'),
+    sb.rpc('last_close_date')
+  ]);
+  S.accounts = must(a); S.categories = must(c); S.teachers = must(tt); S.lastClose = must(lc);
+  if(isOwner()){
+    S.peopleList = must(await sb.from('profiles').select('*').order('created_at'));
+    S.people = Object.fromEntries(S.peopleList.map(p => [p.id, p]));
+  } else {
+    S.people = { [S.me.id]: S.me };
+  }
+}
+async function loadMe(){
+  S.me = must(await sb.from('profiles').select('*').eq('id', S.user.id).maybeSingle());
+  if(!S.me || !S.me.active){ render(); return; }
+  await loadRefs();
+  if(isOwner()){
+    const r = await sb.from('transactions').select('id', { count:'exact', head:true }).eq('status', 'pending');
+    S.pendingCount = r.count || 0;
+  }
+  S.form = null; resetForm();
+  go(isOwner() ? 'home' : 'add');
+}
+async function loadHome(){ S.home = must(await sb.rpc('owner_dashboard')); S.pendingCount = S.home.pending; S.lastClose = S.home.last_close; }
+async function loadPending(){ S.pending = must(await sb.from('transactions').select('*').eq('status', 'pending').order('txn_date').order('entry_no')); S.pendingCount = S.pending.length; }
+async function loadMine(){ S.mine = must(await sb.from('transactions').select('*').eq('created_by', S.user.id).order('created_at', { ascending:false }).limit(100)); }
+function defaultFilters(){ const d = cairoToday(); return { from: monthStart(d), to: d, kind:'', status:'active', account:'', category:'', q:'' }; }
+async function loadEntries(){
+  const f = S.entries.filters || (S.entries.filters = defaultFilters());
+  let q = sb.from('transactions').select('*').gte('txn_date', f.from).lte('txn_date', f.to)
+    .order('txn_date', { ascending:false }).order('entry_no', { ascending:false }).limit(2000);
+  if(f.kind) q = q.eq('kind', f.kind);
+  if(f.status === 'active') q = q.in('status', ['approved', 'pending']); else if(f.status) q = q.eq('status', f.status);
+  if(f.account) q = q.or(`account_id.eq.${f.account},to_account_id.eq.${f.account}`);
+  if(f.category) q = q.eq('category_id', f.category);
+  S.entries.rows = must(await q);
+  S.lastClose = must(await sb.rpc('last_close_date'));
+}
+async function loadClose(date){
+  const C = S.close;
+  C.date = date || C.date || cairoToday();
+  C.data = null; C.counts = {};
+  const [b, h] = await Promise.all([
+    sb.rpc('balances_as_of', { p_date: C.date }),
+    sb.from('day_closes').select('*, cash_counts(*)').order('close_date', { ascending:false }).limit(15)
+  ]);
+  C.data = must(b); C.history = must(h); S.lastClose = C.data.last_close;
+}
+async function loadReport(){
+  const R = S.report;
+  if(!R.from){ const d = cairoToday(); R.from = monthStart(d); R.to = d; }
+  R.data = null;
+  R.data = must(await sb.rpc('period_report', { p_from: R.from, p_to: R.to }));
+}
+async function loadAudit(){ S.audit = must(await sb.from('audit_log').select('*').order('at', { ascending:false }).limit(200)); }
+
+/* ================= VIEWS REGISTRY ================= */
+const VIEWS = {
+  home:     { owner:true, load:loadHome,    html:() => homeHtml() },
+  pending:  { owner:true, load:loadPending, html:() => pendingHtml() },
+  add:      { html:() => addHtml() },
+  entries:  { owner:true, load:loadEntries, html:() => entriesHtml() },
+  mine:     { load:loadMine, html:() => mineHtml() },
+  more:     { owner:true, html:() => moreHtml() },
+  close:    { owner:true, load:() => loadClose(), html:() => closeHtml() },
+  reports:  { owner:true, load:loadReport,  html:() => reportsHtml() },
+  settings: { owner:true, html:() => settingsHtml() },
+  audit:    { owner:true, load:loadAudit,   html:() => auditHtml() }
+};
+async function go(v){
+  if(!VIEWS[v] || (VIEWS[v].owner && !isOwner())) v = isOwner() ? 'home' : 'add';
+  S.view = v; S.loading = !!VIEWS[v].load;
+  render(); window.scrollTo(0, 0);
+  if(VIEWS[v].load){
+    try { await VIEWS[v].load(); } catch(e){ console.error(e); toast(errText(e), 'err'); }
+    S.loading = false;
+    if(S.view === v) rerenderMain();
+  }
+}
+async function refreshView(loader){
+  S.loading = true; rerenderMain();
+  try { await loader(); } catch(e){ console.error(e); toast(errText(e), 'err'); }
+  S.loading = false; rerenderMain();
+}
+
+/* ================= SHELL ================= */
+function render(){
+  applyLang();
+  const app = $('#app');
+  if(!S.user){ app.innerHTML = loginHtml(); return; }
+  if(!S.me || !S.me.active){ app.innerHTML = inactiveHtml(); return; }
+  app.innerHTML = headerHtml() + `<main id="main">${mainHtml()}</main>` + navHtml();
+}
+function rerenderMain(){
+  const m = $('#main'); if(!m){ render(); return; }
+  m.innerHTML = mainHtml();
+  const n = $('nav.bottom'); if(n) n.outerHTML = navHtml();
+}
+function mainHtml(){
+  const v = VIEWS[S.view]; if(!v) return '';
+  if(S.loading && S.view !== 'close' && S.view !== 'reports') return loadingHtml();
+  try { return v.html(); } catch(e){ console.error(e); return `<div class="card err">${esc(e.message)}</div>`; }
+}
+function headerHtml(){
+  return `<header class="top"><div class="brand"><div><h1>${t('app')}</h1><small>${bd(S.me.full_name)} · ${t('role_' + S.me.role)}</small></div></div>
+  <button class="hbtn" data-act="lang" aria-label="Language">${S.lang === 'ar' ? 'EN' : 'ع'}</button>
+  <button class="hbtn" data-act="signout" aria-label="${esc(t('signOut'))}" title="${esc(t('signOut'))}">${ICON.out}</button></header>`;
+}
+function navHtml(){
+  const items = isOwner() ? [['home','home'],['pending','check'],['add','plus'],['entries','list'],['more','dots']] : [['add','plus'],['mine','list']];
+  const moreViews = ['more','close','reports','settings','audit'];
+  return `<nav class="bottom">${items.map(([v, ic]) => {
+    const on = S.view === v || (v === 'more' && moreViews.includes(S.view));
+    const badge = v === 'pending' && S.pendingCount > 0 ? `<i class="badge-n">${S.pendingCount}</i>` : '';
+    return `<button class="${on ? 'on' : ''} ${v === 'add' ? 'plus' : ''}" data-act="go" data-v="${v}">${ICON[ic]}<span>${t('nav_' + v)}</span>${badge}</button>`;
+  }).join('')}</nav>`;
+}
+function loginHtml(){
+  return `<div class="login"><div class="card"><div class="logo">${ICON.logo}</div><h1>${t('app')}</h1><p class="muted">${t('tagline')}</p>
+  ${notHosted() ? `<div class="err" style="margin-top:14px;text-align:start">${t('notHosted')}</div>` : ''}
+  <form data-form="login" novalidate>
+    <label class="fld"><span>${t('email')}</span><input type="text" name="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" dir="ltr" required></label>
+    <label class="fld"><span>${t('password')}</span><input type="password" name="password" autocomplete="current-password" dir="ltr" required></label>
+    <div class="err" hidden></div>
+    <button class="btn primary block" type="submit">${t('signIn')}</button>
+  </form>
+  <button class="linkbtn" data-act="lang">${S.lang === 'ar' ? 'English' : 'العربية'}</button></div></div>`;
+}
+function inactiveHtml(){
+  return `<div class="login"><div class="card"><div class="logo">${ICON.lock}</div><h1>${t('inactiveTitle')}</h1>
+  <p class="muted">${t('inactiveBody')}</p><p class="muted small" dir="ltr">${esc(S.user && showLogin(S.user.email))}</p>
+  <button class="btn primary block" data-act="recheck">${t('checkAgain')}</button>
+  <button class="btn block" style="margin-top:10px" data-act="signout">${t('signOut')}</button></div></div>`;
+}
+
+/* ================= ENTRY CARD ================= */
+function entryCard(x, actions = ''){
+  const sign = x.kind === 'income' ? '+' : x.kind === 'expense' ? '−' : '';
+  const live = x.status === 'approved' || x.status === 'pending';
+  const cls = !live ? 'muted strike' : x.kind === 'income' ? 'pos' : x.kind === 'expense' ? 'neg' : '';
+  const a1 = nm(accById(x.account_id)), a2 = x.to_account_id ? nm(accById(x.to_account_id)) : '';
+  const c = x.category_id ? nm(catById(x.category_id)) : t('k_transfer');
+  const tc = x.teacher_id && tchById(x.teacher_id) ? tchById(x.teacher_id).name : '';
+  const note = x.decision_note || x.void_reason;
+  return `<article class="card entry ${x.status}">
+    <div class="e-top"><span class="muted small">#${x.entry_no} · ${fmtDate(x.txn_date)} · ${t('k_' + x.kind)}</span><span class="pill ${x.status}">${t('s_' + x.status)}</span></div>
+    <div class="e-main"><div><b>${esc(c)}</b><div class="muted small">${esc(a1)}${a2 ? ` <span class="arr">→</span> ${esc(a2)}` : ''}${tc ? ` · ${bd(tc)}` : ''}</div></div>
+      <b class="num e-amt ${cls}">${sign}${fmtMoney(x.amount)}</b></div>
+    <p class="e-desc">${bd(x.description)}${x.party ? ` <span class="muted">· ${bd(x.party)}</span>` : ''}${x.reference ? ` <span class="muted">· ${bd(x.reference)}</span>` : ''}</p>
+    ${note ? `<p class="note"><b>${t('reasonLbl')}:</b> ${bd(note)}</p>` : ''}
+    <div class="e-foot"><span class="muted small">${t('entryBy', bd(personName(x.created_by)))} · ${fmtDateTime(x.created_at)}</span>
+      ${x.receipt_path ? `<button class="btn sm" data-act="receipt" data-path="${esc(x.receipt_path)}">${ICON.clip}${t('receiptBtn')}</button>` : ''}</div>
+    ${actions ? `<div class="e-act">${actions}</div>` : ''}
+  </article>`;
+}
+
+/* ================= HOME ================= */
+function homeHtml(){
+  const d = S.home; if(!d) return loadingHtml();
+  const total = d.balances.reduce((s, b) => s + Number(b.balance), 0);
+  const net = Number(d.month_income) - Number(d.month_expense);
+  const stale = !d.last_close || d.last_close < addDays(d.today, -1);
+  const fresh = !d.last_close && d.balances.every(b => Number(b.balance) === 0);
+  return `
+  ${d.pending > 0 ? `<button class="banner" data-act="go" data-v="pending">${t('pendingBanner', d.pending)} ›</button>` : ''}
+  ${fresh ? `<section class="card"><h3>${t('startTitle')}</h3><p class="muted">${t('startBody')}</p><button class="btn primary block" data-act="openingStart">${t('startBtn')}</button></section>` : ''}
+  <section class="card">
+    <div class="rowline"><h2>${t('balances')}</h2><span class="muted small">${t('now')}</span></div>
+    <div class="total">${money(total)}</div>
+    <ul class="rows">${d.balances.map(b => `<li><span>${esc(nm(b))}</span><b class="${Number(b.balance) < 0 ? 'neg' : ''}">${money(b.balance)}</b></li>`).join('')}</ul>
+  </section>
+  <section class="grid2">
+    <div class="card stat"><span class="muted small">${t('todayIncome')}</span><b class="pos">${money(d.today_income)}</b></div>
+    <div class="card stat"><span class="muted small">${t('todayExpense')}</span><b class="neg">${money(d.today_expense)}</b></div>
+    <div class="card stat"><span class="muted small">${t('monthIncome')}</span><b class="pos">${money(d.month_income)}</b></div>
+    <div class="card stat"><span class="muted small">${t('monthExpense')}</span><b class="neg">${money(d.month_expense)}</b></div>
+  </section>
+  <section class="card"><div class="rowline"><b>${t('monthNet')}</b><b class="big ${net < 0 ? 'neg' : 'pos'}">${money(net)}</b></div></section>
+  <section class="card ${stale ? 'warnbox' : ''}"><div class="rowline"><span>${d.last_close ? t('closedUntil', fmtDate(d.last_close)) : t('notClosed')}</span>
+    <button class="btn sm" data-act="go" data-v="close">${t('closeDay')}</button></div>
+    ${stale ? `<p class="muted small" style="margin:8px 0 0">${t('closeReminder')}</p>` : ''}</section>`;
+}
+
+/* ================= ADD ENTRY ================= */
+function resetForm(){
+  const prev = S.form;
+  const cash = S.accounts.find(a => a.active && a.kind === 'cash');
+  S.form = {
+    kind: prev ? prev.kind : 'expense',
+    date: prev ? prev.date : cairoToday(),
+    account: prev ? prev.account : (cash ? cash.id : ''),
+    to:'', category:'', teacher:'', amount:'', party:'', desc:'', ref:''
+  };
+  S.formFile = null;
+}
+function addHtml(){
+  if(!S.form) resetForm();
+  const F = S.form, owner = isOwner(), k = F.kind;
+  const kinds = owner ? ['expense','income','transfer'] : ['expense','income'];
+  if(!kinds.includes(k)) F.kind = 'expense';
+  const accs = S.accounts.filter(a => a.active);
+  const cats = S.categories.filter(c => c.active && c.kind === F.kind && !['cash_over','cash_short'].includes(c.system_code) && (owner || !c.owner_only));
+  const cat = catById(F.category);
+  const showTeacher = F.kind !== 'transfer' && cat && cat.teacher_link !== 'none';
+  const teacherReq = cat && (cat.teacher_link === 'collection' || cat.teacher_link === 'payout');
+  const today = cairoToday();
+  const minDate = S.lastClose ? addDays(S.lastClose, 1) : '';
+  const todayClosed = S.lastClose && S.lastClose >= today;
+  const acctLabel = F.kind === 'income' ? t('receivedInto') : F.kind === 'expense' ? t('paidFrom') : t('fromAccount');
+  return `<form class="card" data-form="entry" novalidate autocomplete="off">
+    <div class="seg">${kinds.map(x => `<button type="button" class="seg-b k-${x} ${x === F.kind ? 'on' : ''}" data-act="kind" data-k="${x}">${t('k_' + x)}</button>`).join('')}</div>
+    ${todayClosed ? `<div class="info">${t('dayClosed', fmtDate(S.lastClose))}</div>` : ''}
+    <label class="fld"><span>${t('amount')} <em>(${t('cur')})</em></span><input class="amount" name="amount" inputmode="decimal" enterkeyhint="next" value="${esc(F.amount)}" placeholder="0"></label>
+    <label class="fld"><span>${t('date')}</span><input type="date" name="date" value="${esc(F.date)}" max="${today}"${minDate ? ` min="${minDate}"` : ''}></label>
+    <label class="fld"><span>${acctLabel}</span><select name="account">${opt('', t('choose'), F.account)}${accs.map(a => opt(a.id, nm(a), F.account)).join('')}</select></label>
+    ${F.kind === 'transfer'
+      ? `<label class="fld"><span>${t('toAccount')}</span><select name="to">${opt('', t('choose'), F.to)}${accs.filter(a => a.id !== F.account).map(a => opt(a.id, nm(a), F.to)).join('')}</select></label>`
+      : `<label class="fld"><span>${t('category')}</span><select name="category">${opt('', t('choose'), F.category)}${cats.map(c => opt(c.id, nm(c), F.category)).join('')}</select></label>`}
+    ${showTeacher ? `<label class="fld"><span>${t('teacher')}${teacherReq ? '' : ` <em>(${t('optional')})</em>`}</span><select name="teacher">${opt('', t('choose'), F.teacher)}${S.teachers.filter(x => x.active).map(x => opt(x.id, x.name, F.teacher)).join('')}</select></label>` : ''}
+    ${F.kind !== 'transfer' ? `<label class="fld"><span>${F.kind === 'income' ? t('receivedFrom') : t('paidTo')} <em>(${t('optional')})</em></span><input name="party" value="${esc(F.party)}" maxlength="120"></label>` : ''}
+    <label class="fld"><span>${t('description')}</span><textarea name="desc" rows="2" maxlength="300" placeholder="${esc(t('descHint'))}">${esc(F.desc)}</textarea></label>
+    <label class="fld"><span>${t('reference')} <em>(${t('optional')})</em></span><input name="ref" value="${esc(F.ref)}" maxlength="60" dir="auto"></label>
+    ${F.kind !== 'transfer' ? `<label class="fld"><span>${t('receipt')} <em>(${t('optional')})</em></span><input type="file" name="file" accept="image/*,application/pdf"><small class="muted" data-filename>${S.formFile ? esc(S.formFile.name) : ''}</small></label>` : ''}
+    <div class="err" hidden></div>
+    <button class="btn primary block" type="submit">${t('review')}</button>
+    ${!owner ? `<p class="muted small center" style="margin:10px 0 0">${t('willBePending')}</p>` : ''}
+  </form>`;
+}
+async function submitEntry(f){
+  const errEl = f.querySelector('.err'); errEl.hidden = true;
+  const F = S.form, k = F.kind, today = cairoToday();
+  const fail = key => { errEl.textContent = t(key, S.lastClose ? fmtDate(S.lastClose) : ''); errEl.hidden = false; errEl.scrollIntoView({ block:'nearest' }); };
+  const amount = parseAmount(F.amount);
+  if(amount === null) return fail('v_amount');
+  if(!F.date || F.date > today) return fail('v_date');
+  if(S.lastClose && F.date <= S.lastClose) return fail('v_closed');
+  if(!F.account) return fail('v_account');
+  const cat = catById(F.category);
+  if(k === 'transfer'){ if(!F.to || F.to === F.account) return fail('v_to'); }
+  else {
+    if(!cat) return fail('v_category');
+    if((cat.teacher_link === 'collection' || cat.teacher_link === 'payout') && !F.teacher) return fail('v_teacher');
+  }
+  if(F.desc.trim().length < 3) return fail('v_desc');
+  if(S.formFile && S.formFile.size > 5 * 1024 * 1024 && !(S.formFile.type || '').startsWith('image/')) return fail('v_file');
+
+  let dups = [];
+  await run(async () => {
+    const r = await sb.from('transactions').select('*').eq('txn_date', F.date).eq('amount', amount).eq('kind', k).eq('account_id', F.account).in('status', ['pending','approved']).limit(3);
+    if(!r.error) dups = r.data || [];
+  });
+  S.pendingSave = {
+    p_kind: k, p_date: F.date, p_amount: amount, p_account: F.account,
+    p_to_account: k === 'transfer' ? F.to : null,
+    p_category: k !== 'transfer' ? F.category : null,
+    p_teacher: k !== 'transfer' && cat && cat.teacher_link !== 'none' && F.teacher ? F.teacher : null,
+    p_party: k !== 'transfer' ? F.party.trim() || null : null,
+    p_description: F.desc.trim(), p_reference: F.ref.trim() || null
+  };
+  const P = S.pendingSave;
+  const row = (l, v) => v ? `<li><span>${esc(l)}</span><span>${esc(v)}</span></li>` : '';
+  openModal(`<h3>${t('confirmTitle')}</h3>
+    <div class="sum-amt ${k === 'income' ? 'pos' : k === 'expense' ? 'neg' : ''}">${k === 'income' ? '+' : k === 'expense' ? '−' : ''}${money(amount)}</div>
+    <ul class="sum">
+      ${row(t('k_' + k), fmtDate(P.p_date))}
+      ${row(k === 'income' ? t('receivedInto') : k === 'expense' ? t('paidFrom') : t('fromAccount'), nm(accById(P.p_account)))}
+      ${k === 'transfer' ? row(t('toAccount'), nm(accById(P.p_to_account))) : row(t('category'), nm(cat))}
+      ${P.p_teacher ? row(t('teacher'), tchById(P.p_teacher).name) : ''}
+      ${row(k === 'income' ? t('receivedFrom') : t('paidTo'), P.p_party)}
+      ${row(t('description'), P.p_description)}
+      ${row(t('reference'), P.p_reference)}
+      ${S.formFile ? row(t('receipt'), S.formFile.name) : ''}
+    </ul>
+    ${dups.length ? `<div class="err">${t('dupWarn')}<br>${dups.map(d => `#${d.entry_no} · ${esc(d.description)} (${t('s_' + d.status)})`).join('<br>')}</div>` : ''}
+    <div class="err" id="saveErr" hidden></div>
+    <div class="btns"><button class="btn" data-act="modalClose">${t('cancel')}</button><button class="btn primary" data-act="confirmSave">${t('confirmSave')}</button></div>`);
+}
+async function compressReceipt(file){
+  const ext = ((file.name || '').split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  if(!(file.type || '').startsWith('image/') || /heic|heif/i.test(file.type)) return { blob:file, type:file.type || 'application/octet-stream', ext };
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+    if(blob) return { blob, type:'image/jpeg', ext:'jpg' };
+  } catch(e){ console.warn(e); }
+  return { blob:file, type:file.type, ext };
+}
+async function confirmSave(){
+  const P = S.pendingSave; if(!P) return;
+  await run(async () => {
+    let path = null;
+    if(S.formFile){
+      const c = await compressReceipt(S.formFile);
+      if(c.blob.size > 5 * 1024 * 1024) throw new Error(t('v_file'));
+      path = `${S.user.id}/${crypto.randomUUID()}.${c.ext}`;
+      const up = await sb.storage.from('receipts').upload(path, c.blob, { contentType:c.type, upsert:false });
+      if(up.error) throw up.error;
+    }
+    const row = must(await sb.rpc('add_entry', { ...P, p_receipt_path: path }));
+    closeModal();
+    toast(row.status === 'approved' ? t('savedApproved', row.entry_no) : t('savedPending', row.entry_no));
+    resetForm();
+    rerenderMain(); window.scrollTo(0, 0);
+  }, $('#saveErr'));
+}
+
+/* ================= PENDING / MINE / ENTRIES ================= */
+function pendingHtml(){
+  const rows = S.pending;
+  return pageHead(t('nav_pending'), `<button class="btn sm" data-act="reload">${ICON.refresh}${t('refresh')}</button>`)
+    + (rows.length ? rows.map(x => entryCard(x,
+      `<button class="btn danger" data-act="reject" data-id="${x.id}" data-no="${x.entry_no}">${t('reject')}</button>
+       <button class="btn primary" data-act="approve" data-id="${x.id}" data-no="${x.entry_no}">${t('approve')}</button>`)).join('') : empty(t('noPending')));
+}
+function mineHtml(){
+  return pageHead(t('nav_mine'), `<button class="btn sm" data-act="reload">${ICON.refresh}${t('refresh')}</button>`)
+    + (S.mine.length ? S.mine.map(x => entryCard(x)).join('') : empty(t('noMine')));
+}
+function filteredEntries(){
+  const f = S.entries.filters || defaultFilters();
+  const q = (f.q || '').trim().toLowerCase();
+  let rows = S.entries.rows || [];
+  if(q) rows = rows.filter(x => [x.description, x.party, x.reference, String(x.entry_no), nm(catById(x.category_id)), tchById(x.teacher_id) && tchById(x.teacher_id).name]
+    .some(v => v && String(v).toLowerCase().includes(q)));
+  return rows;
+}
+function entriesHtml(){
+  const f = S.entries.filters || (S.entries.filters = defaultFilters());
+  const rows = filteredEntries();
+  const inc = rows.filter(x => x.status === 'approved' && x.kind === 'income').reduce((s, x) => s + Number(x.amount), 0);
+  const exp = rows.filter(x => x.status === 'approved' && x.kind === 'expense').reduce((s, x) => s + Number(x.amount), 0);
+  const canVoid = x => x.status === 'approved' && (!S.lastClose || x.txn_date > S.lastClose);
+  return pageHead(t('nav_entries'), `<button class="btn sm" data-act="csv">${t('exportCsv')}</button>`) + `
+  <form class="card" data-form="filters">
+    <div class="grid2 tight">
+      <label class="fld"><span>${t('from')}</span><input type="date" name="from" value="${esc(f.from)}"></label>
+      <label class="fld"><span>${t('to')}</span><input type="date" name="to" value="${esc(f.to)}"></label>
+      <label class="fld"><select name="kind">${opt('', t('kindAll'), f.kind)}${['income','expense','transfer'].map(k => opt(k, t('k_' + k), f.kind)).join('')}</select></label>
+      <label class="fld"><select name="status">${opt('active', t('statusActive'), f.status)}${['approved','pending','rejected','void'].map(s => opt(s, t('s_' + s), f.status)).join('')}${opt('', t('statusAll'), f.status)}</select></label>
+      <label class="fld"><select name="account">${opt('', t('allAccounts'), f.account)}${S.accounts.map(a => opt(a.id, nm(a), f.account)).join('')}</select></label>
+      <label class="fld"><select name="category">${opt('', t('allCategories'), f.category)}${S.categories.map(c => opt(c.id, `${nm(c)} (${t('k_' + c.kind)})`, f.category)).join('')}</select></label>
+    </div>
+    <label class="fld"><input name="q" value="${esc(f.q)}" placeholder="${esc(t('search'))}" type="search"></label>
+    <button class="btn primary block" type="submit">${t('apply')}</button>
+  </form>
+  <section class="card"><div class="rowline"><span class="muted">${t('countRows', rows.length)}</span></div>
+    <div class="rowline" style="margin-top:6px"><span>${t('income')}</span><b class="pos">${money(inc)}</b></div>
+    <div class="rowline"><span>${t('expenses')}</span><b class="neg">${money(exp)}</b></div></section>
+  ${rows.length ? rows.map(x => entryCard(x, canVoid(x) ? `<button class="btn sm danger" data-act="void" data-id="${x.id}" data-no="${x.entry_no}">${t('voidBtn')}</button>` : '')).join('') : empty(t('noEntries'))}`;
+}
+function exportCsv(){
+  const f = S.entries.filters || defaultFilters();
+  const rows = filteredEntries();
+  const head = ['No','Date','Type','Status','Amount','Account','To account','Category','Teacher','Paid to / received from','Description','Reference','Entered by','Entered at','Decided by','Reason'];
+  const safe = v => { let s = String(v ?? ''); if(typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const lines = [head, ...rows.map(x => [
+    x.entry_no, x.txn_date, x.kind, x.status, Number(x.amount),
+    accById(x.account_id) ? accById(x.account_id).name : '', x.to_account_id && accById(x.to_account_id) ? accById(x.to_account_id).name : '',
+    x.category_id && catById(x.category_id) ? catById(x.category_id).name : '', x.teacher_id && tchById(x.teacher_id) ? tchById(x.teacher_id).name : '',
+    x.party || '', x.description, x.reference || '', personName(x.created_by), x.created_at, x.decided_by ? personName(x.decided_by) : '', x.decision_note || x.void_reason || ''
+  ])];
+  const csv = '\ufeff' + lines.map(r => r.map(safe).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = `center-entries_${f.from}_${f.to}.csv`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/* ================= MORE ================= */
+function moreHtml(){
+  const tile = (v, ic, title, sub) => `<button class="tile" data-act="go" data-v="${v}">${ICON[ic]}<b>${title}</b><span>${sub}</span></button>`;
+  return pageHead(t('nav_more')) + `<div class="tiles">
+    ${tile('close', 'lock', t('closeDay'), t('moreClose'))}
+    ${tile('reports', 'chart', t('reports'), t('moreReports'))}
+    ${tile('settings', 'gear', t('settings'), t('moreSettings'))}
+    ${tile('audit', 'eye', t('audit'), t('moreAudit'))}
+  </div>`;
+}
+
+/* ================= CLOSE DAY ================= */
+function closeHtml(){
+  const C = S.close, d = C.data, today = cairoToday();
+  const minDate = S.lastClose ? addDays(S.lastClose, 1) : '';
+  let body = '';
+  if(S.loading || !d) body = loadingHtml();
+  else if(S.lastClose && C.date <= S.lastClose) body = `<div class="info">${t('alreadyClosedInfo')}</div>`;
+  else {
+    body = `${d.pending > 0 ? `<div class="err">${t('pendingBlock', d.pending)}<br><button type="button" class="btn sm" style="margin-top:8px" data-act="go" data-v="pending">${t('goApprove')}</button></div>` : ''}
+    <form data-form="close" novalidate>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('account')}</th><th class="r">${t('expected')}</th><th class="r" style="width:34%">${t('counted')}</th><th class="r">${t('difference')}</th></tr></thead><tbody>
+      ${d.accounts.map(a => `<tr><td>${esc(nm(a))}</td><td class="r num">${fmtMoney(a.expected)}</td>
+        <td><input data-acc="${a.id}" inputmode="decimal" value="${esc(C.counts[a.id] ?? '')}" placeholder="${a.kind === 'cash' ? '' : t('skip')}" aria-label="${esc(nm(a))}"></td>
+        <td class="r"><span class="num muted" id="diff-${a.id}">—</span></td></tr>`).join('')}
+      </tbody></table></div>
+      <label class="fld" style="margin-top:12px"><span>${t('note')} <em>(${t('noteHint')})</em></span><textarea name="note" rows="2" maxlength="300"></textarea></label>
+      <label class="chk"><input type="checkbox" name="post" checked>${t('postAdj')}</label>
+      <div class="err" hidden></div>
+      <button class="btn primary block" type="submit"${d.pending > 0 ? ' disabled' : ''}>${t('closeDay')}</button>
+    </form>`;
+  }
+  const hist = (C.history || []).map(h => `<li class="col"><div class="rowline"><b>${fmtDate(h.close_date)}</b><span class="muted small">${bd(personName(h.closed_by))} · ${fmtDateTime(h.closed_at)}</span></div>
+    ${(h.cash_counts || []).map(cc => `<div class="rowline small"><span class="muted">${esc(nm(accById(cc.account_id)))}</span><span><span class="num">${fmtMoney(cc.counted)}</span>${Number(cc.difference) !== 0 ? ` <b class="num ${Number(cc.difference) < 0 ? 'neg' : 'pos'}">(${Number(cc.difference) > 0 ? '+' : ''}${fmtMoney(cc.difference)})</b>` : ''}</span></div>`).join('')}
+    ${h.note ? `<div class="muted small">${esc(h.note)}</div>` : ''}</li>`).join('');
+  return pageHead(t('closeTitle')) + `<section class="card"><p class="muted" style="margin-top:0">${t('closeIntro')}</p>
+    <label class="fld"><span>${t('closeDate')}</span><input type="date" name="closeDate" value="${esc(C.date || today)}" max="${today}"${minDate ? ` min="${minDate}"` : ''}></label>
+    ${body}</section>
+    ${hist ? `<section class="card"><h3>${t('history')}</h3><ul class="rows">${hist}</ul></section>` : ''}`;
+}
+function updateCloseDiff(id){
+  const d = S.close.data; if(!d) return;
+  const a = d.accounts.find(x => x.id === id); const el = document.getElementById('diff-' + id); if(!a || !el) return;
+  const raw = S.close.counts[id];
+  const v = parseAmount(raw, true);
+  if(raw === undefined || String(raw).trim() === '' || v === null){ el.textContent = '—'; el.className = 'num muted'; return; }
+  const diff = r2(v - Number(a.expected));
+  el.textContent = (diff > 0 ? '+' : '') + fmtMoney(diff);
+  el.className = 'num ' + (diff === 0 ? 'ok' : diff > 0 ? 'pos' : 'neg');
+}
+function submitClose(f){
+  const errEl = f.querySelector('.err'); errEl.hidden = true;
+  const d = S.close.data, date = S.close.date;
+  const fail = m => { errEl.textContent = m; errEl.hidden = false; errEl.scrollIntoView({ block:'nearest' }); };
+  const counts = []; let anyDiff = false; const lines = [];
+  for(const a of d.accounts){
+    const raw = S.close.counts[a.id];
+    if(raw === undefined || String(raw).trim() === ''){ if(a.kind === 'cash') return fail(t('v_count', nm(a))); continue; }
+    const v = parseAmount(raw, true); if(v === null) return fail(t('v_countBad', nm(a)));
+    const diff = r2(v - Number(a.expected)); if(diff !== 0) anyDiff = true;
+    counts.push({ account_id: a.id, counted: v });
+    lines.push(`<li><span>${esc(nm(a))}</span><span><span class="num">${fmtMoney(v)}</span>${diff !== 0 ? ` <b class="num ${diff < 0 ? 'neg' : 'pos'}">(${diff > 0 ? '+' : ''}${fmtMoney(diff)})</b>` : ' ✓'}</span></li>`);
+  }
+  const note = f.elements.note.value.trim();
+  if(anyDiff && note.length < 3) return fail(t('v_note'));
+  S.pendingClose = { p_date: date, p_counts: counts, p_note: note || null, p_post_adjustments: f.elements.post.checked };
+  openModal(`<h3>${t('closeConfirm', fmtDate(date))}</h3><ul class="sum">${lines.join('')}</ul>
+    ${note ? `<p class="muted">${esc(note)}</p>` : ''}<div class="info">${t('closeWarn', fmtDate(date))}</div>
+    <div class="err" id="closeErr" hidden></div>
+    <div class="btns"><button class="btn" data-act="modalClose">${t('cancel')}</button><button class="btn primary" data-act="confirmClose">${t('closeDay')}</button></div>`);
+}
+async function confirmClose(){
+  const P = S.pendingClose; if(!P) return;
+  await run(async () => {
+    must(await sb.rpc('close_day', P));
+    closeModal(); toast(t('closedOk', fmtDate(P.p_date)));
+    S.lastClose = P.p_date; S.close.date = null;
+    go('home');
+  }, $('#closeErr'));
+}
+
+/* ================= REPORTS ================= */
+function reportsHtml(){
+  const R = S.report, d = R.data, today = cairoToday();
+  const [lmS, lmE] = (() => { const y = +today.slice(0, 4), m = +today.slice(5, 7); const py = m === 1 ? y - 1 : y, pm = m === 1 ? 12 : m - 1; return [`${py}-${String(pm).padStart(2, '0')}-01`, addDays(monthStart(today), -1)]; })();
+  const presets = [['month', monthStart(today), today, t('thisMonth')], ['last', lmS, lmE, t('lastMonth')], ['year', today.slice(0, 4) + '-01-01', today, t('thisYear')]];
+  const head = pageHead(t('reportsTitle')) + `<form class="card" data-form="range">
+    <div class="chips">${presets.map(p => `<button type="button" class="chip ${R.from === p[1] && R.to === p[2] ? 'on' : ''}" data-act="preset" data-from="${p[1]}" data-to="${p[2]}">${p[3]}</button>`).join('')}</div>
+    <div class="grid2 tight"><label class="fld"><span>${t('from')}</span><input type="date" name="from" value="${esc(R.from || '')}"></label>
+    <label class="fld"><span>${t('to')}</span><input type="date" name="to" value="${esc(R.to || '')}"></label></div>
+    <button class="btn block" type="submit">${t('apply')}</button></form>`;
+  if(S.loading || !d) return head + loadingHtml();
+  const pnl = d.categories.filter(c => c.in_pnl);
+  const inc = pnl.filter(c => c.kind === 'income'), exp = pnl.filter(c => c.kind === 'expense'), other = d.categories.filter(c => !c.in_pnl);
+  const sum = l => l.reduce((s, c) => s + Number(c.total), 0);
+  const ti = sum(inc), te = sum(exp), net = ti - te;
+  const bars = (list, cls) => { if(!list.length) return `<p class="muted">${t('nothing')}</p>`; const max = Math.max(...list.map(c => Number(c.total)), 1);
+    return `<ul class="rows">${list.map(c => `<li class="col"><div class="rowline"><span>${esc(nm(c))} <span class="muted small">×${c.n}</span></span><b>${money(c.total)}</b></div><div class="bar ${cls}"><i style="width:${(100 * Number(c.total) / max).toFixed(1)}%"></i></div></li>`).join('')}</ul>`; };
+  const teachers = d.teachers.filter(x => Number(x.collected) || Number(x.paid) || Number(x.balance_due));
+  const mMax = Math.max(1, ...d.monthly.map(m => Math.max(Number(m.income), Number(m.expense))));
+  return head + `
+  <section class="grid2">
+    <div class="card stat"><span class="muted small">${t('income')}</span><b class="pos">${money(ti)}</b></div>
+    <div class="card stat"><span class="muted small">${t('expenses')}</span><b class="neg">${money(te)}</b></div>
+  </section>
+  <section class="card"><div class="rowline"><b>${t('net')}</b><b class="big ${net < 0 ? 'neg' : 'pos'}">${money(net)}</b></div></section>
+  <section class="card"><h3>${t('byIncome')}</h3>${bars(inc, 'in')}</section>
+  <section class="card"><h3>${t('byExpense')}</h3>${bars(exp, 'out')}</section>
+  ${other.length ? `<section class="card"><h3>${t('notInPnl')}</h3><ul class="rows">${other.map(c => `<li><span>${esc(nm(c))}</span><b>${money(c.total)}</b></li>`).join('')}</ul></section>` : ''}
+  <section class="card"><h3>${t('teachersTitle')}</h3>
+    ${teachers.length ? teachers.map(x => `<div class="card" style="background:var(--soft);border:0;margin-bottom:10px"><div class="rowline"><b>${esc(x.name)}</b><span class="muted small">${t('share')}: ${Number(x.center_share_pct)}%</span></div>
+      <div class="rowline small"><span class="muted">${t('collected')}</span><span>${money(x.collected)}</span></div>
+      <div class="rowline small"><span class="muted">${t('centerShare')}</span><span>${money(x.center_share)}</span></div>
+      <div class="rowline small"><span class="muted">${t('teacherDue')}</span><span>${money(Number(x.collected) - Number(x.center_share))}</span></div>
+      <div class="rowline small"><span class="muted">${t('paid')}</span><span>${money(x.paid)}</span></div>
+      <div class="rowline" style="margin-top:4px"><b>${t('owed')}</b><b class="${Number(x.balance_due) < 0 ? 'neg' : ''}">${money(x.balance_due)}</b></div></div>`).join('')
+      + `<p class="muted small" style="margin:0">${t('owedHint')}</p>` : `<p class="muted">${t('nothing')}</p>`}
+  </section>
+  <section class="card"><h3>${t('accountsMove')}</h3><div class="tbl-wrap"><table><thead><tr><th>${t('account')}</th><th class="r">${t('moneyIn')}</th><th class="r">${t('moneyOut')}</th><th class="r">${t('closing')}</th></tr></thead>
+    <tbody>${d.accounts.map(a => `<tr><td>${esc(nm(a))}</td><td class="r num pos">${fmtMoney(a.money_in)}</td><td class="r num neg">${fmtMoney(a.money_out)}</td><td class="r num"><b>${fmtMoney(a.closing)}</b></td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card"><h3>${t('last12')}</h3>${d.monthly.length ? `<div class="tbl-wrap"><table><thead><tr><th>${t('month')}</th><th class="r">${t('income')}</th><th class="r">${t('expenses')}</th><th class="r">${t('net')}</th></tr></thead>
+    <tbody>${d.monthly.map(m => { const n = Number(m.income) - Number(m.expense); return `<tr><td class="num">${m.month}<div class="bar in"><i style="width:${(100 * Number(m.income) / mMax).toFixed(1)}%"></i></div><div class="bar out"><i style="width:${(100 * Number(m.expense) / mMax).toFixed(1)}%"></i></div></td><td class="r num">${fmtMoney(m.income)}</td><td class="r num">${fmtMoney(m.expense)}</td><td class="r num ${n < 0 ? 'neg' : 'pos'}">${fmtMoney(n)}</td></tr>`; }).join('')}</tbody></table></div>` : `<p class="muted">${t('nothing')}</p>`}</section>`;
+}
+
+/* ================= SETTINGS ================= */
+function settingsHtml(){
+  const tabs = ['accounts','categories','teachers','team'];
+  const tab = S.settingsTab;
+  let body = '';
+  if(tab === 'accounts'){
+    body = `<ul class="rows">${S.accounts.map(a => `<li class="srow"><div><b>${esc(a.name)}</b>${a.name_ar ? ` <span class="muted">${esc(a.name_ar)}</span>` : ''}
+      <div class="muted small">${t('ak_' + a.kind)}${a.allow_negative ? ' · ' + t('allowNegative') : ''}</div></div>
+      <div class="srow-r">${a.active ? '' : `<span class="pill">${t('inactive')}</span>`}<button class="btn sm" data-act="editAccount" data-id="${a.id}">${t('edit')}</button></div></li>`).join('')}</ul>
+      <button class="btn block" style="margin-top:12px" data-act="editAccount" data-id="">+ ${t('newAccount')}</button>`;
+  } else if(tab === 'categories'){
+    const group = kind => `<h3 style="margin-top:6px">${t('k_' + kind)}</h3><ul class="rows">${S.categories.filter(c => c.kind === kind).map(c => `<li class="srow"><div><b>${esc(c.name)}</b>${c.name_ar ? ` <span class="muted">${esc(c.name_ar)}</span>` : ''}
+      <div class="muted small">${t('tl_' + c.teacher_link)}${c.owner_only ? ' · ' + t('ownerOnly') : ''}${c.in_pnl ? '' : ' · ' + t('notInPnl')}${c.system_code ? ' · 🔒' : ''}</div></div>
+      <div class="srow-r">${c.active ? '' : `<span class="pill">${t('inactive')}</span>`}<button class="btn sm" data-act="editCategory" data-id="${c.id}">${t('edit')}</button></div></li>`).join('')}</ul>`;
+    body = group('income') + '<div style="height:12px"></div>' + group('expense') + `<button class="btn block" style="margin-top:12px" data-act="editCategory" data-id="">+ ${t('newCategory')}</button>`;
+  } else if(tab === 'teachers'){
+    body = (S.teachers.length ? `<ul class="rows">${S.teachers.map(x => `<li class="srow"><div><b>${esc(x.name)}</b><div class="muted small">${esc(x.subject || '')}${x.subject ? ' · ' : ''}${t('share')}: ${Number(x.center_share_pct)}%${x.phone ? ` · <span dir="ltr">${esc(x.phone)}</span>` : ''}</div></div>
+      <div class="srow-r">${x.active ? '' : `<span class="pill">${t('inactive')}</span>`}<button class="btn sm" data-act="editTeacher" data-id="${x.id}">${t('edit')}</button></div></li>`).join('')}</ul>` : '')
+      + `<button class="btn block" style="margin-top:12px" data-act="editTeacher" data-id="">+ ${t('newTeacher')}</button>`;
+  } else {
+    body = `<ul class="rows">${S.peopleList.map(p => `<li class="srow"><div><b>${esc(p.full_name)}</b> ${p.id === S.me.id ? `<span class="muted small">${t('you')}</span>` : ''}
+      <div class="muted small"><span dir="ltr">${esc(showLogin(p.email))}</span> · ${t('role_' + p.role)}</div></div>
+      <div class="srow-r">${p.active ? '' : `<span class="pill rejected">${t('inactive')}</span>`}
+        <button class="btn sm" data-act="editMember" data-id="${p.id}">${t('edit')}</button>
+        <button class="btn sm" data-act="setPwd" data-id="${p.id}">${ICON.lock}</button></div></li>`).join('')}</ul>
+      <button class="btn primary block" style="margin-top:12px" data-act="addStaff">+ ${t('addStaff')}</button>`;
+  }
+  return pageHead(t('settings')) + `<div class="tabs">${tabs.map(x => `<button class="chip ${x === tab ? 'on' : ''}" data-act="settingsTab" data-tab="${x}">${t('set_' + x)}</button>`).join('')}</div><section class="card">${body}</section>`;
+}
+const fld = (name, label, value, extra = '') => `<label class="fld"><span>${label}</span><input name="${name}" value="${esc(value ?? '')}" ${extra}></label>`;
+const chk = (name, label, checked, extra = '') => `<label class="chk"><input type="checkbox" name="${name}" ${checked ? 'checked' : ''} ${extra}>${label}</label>`;
+const modalBtns = () => `<div class="err" hidden></div><div class="btns"><button type="button" class="btn" data-act="modalClose">${t('cancel')}</button><button class="btn primary" type="submit">${t('save')}</button></div>`;
+
+function accountForm(id){
+  const a = accById(id) || { id:'', name:'', name_ar:'', kind:'cash', allow_negative:false, active:true, sort_order:S.accounts.length + 1 };
+  openModal(`<form data-form="account" novalidate><input type="hidden" name="id" value="${esc(a.id)}"><h3>${a.id ? t('editAccount') : t('newAccount')}</h3>
+    ${fld('name', t('name'), a.name, 'dir="ltr" maxlength="60"')}${fld('name_ar', t('nameAr'), a.name_ar, 'dir="rtl" maxlength="60"')}
+    <label class="fld"><span>${t('accKind')}</span><select name="kind">${['cash','instapay','wallet','bank','other'].map(x => opt(x, t('ak_' + x), a.kind)).join('')}</select></label>
+    ${chk('allow_negative', t('allowNegative'), a.allow_negative)}${chk('active', t('active'), a.active)}
+    ${fld('sort_order', t('sortOrder'), a.sort_order, 'inputmode="numeric"')}${modalBtns()}</form>`);
+}
+function categoryForm(id){
+  const c = catById(id) || { id:'', name:'', name_ar:'', kind:'expense', teacher_link:'none', owner_only:false, in_pnl:true, active:true, sort_order:50, system_code:null };
+  const lock = c.system_code ? 'disabled' : '';
+  openModal(`<form data-form="category" novalidate><input type="hidden" name="id" value="${esc(c.id)}"><h3>${c.id ? t('editCategory') : t('newCategory')}</h3>
+    ${c.system_code ? `<div class="info">${t('systemLocked')}</div>` : ''}
+    ${fld('name', t('name'), c.name, 'dir="ltr" maxlength="60"')}${fld('name_ar', t('nameAr'), c.name_ar, 'dir="rtl" maxlength="60"')}
+    <label class="fld"><span>${t('catKind')}</span><select name="kind" ${lock}>${['income','expense'].map(x => opt(x, t('k_' + x), c.kind)).join('')}</select></label>
+    <label class="fld"><span>${t('teacherLink')}</span><select name="teacher_link" ${lock}>${['none','optional','collection','payout'].map(x => opt(x, t('tl_' + x), c.teacher_link)).join('')}</select></label>
+    ${chk('owner_only', t('ownerOnly'), c.owner_only, lock)}${chk('in_pnl', t('inPnl'), c.in_pnl, lock)}${chk('active', t('active'), c.active, lock)}
+    ${fld('sort_order', t('sortOrder'), c.sort_order, 'inputmode="numeric"')}${modalBtns()}</form>`);
+}
+function teacherForm(id){
+  const x = tchById(id) || { id:'', name:'', phone:'', subject:'', center_share_pct:0, active:true };
+  openModal(`<form data-form="teacher" novalidate><input type="hidden" name="id" value="${esc(x.id)}"><h3>${x.id ? t('editTeacher') : t('newTeacher')}</h3>
+    ${fld('name', t('tName'), x.name, 'maxlength="80" dir="auto"')}${fld('subject', t('subject'), x.subject, 'maxlength="60" dir="auto"')}
+    ${fld('phone', t('phone'), x.phone, 'inputmode="tel" dir="ltr" maxlength="30"')}
+    ${fld('share', t('share'), Number(x.center_share_pct), 'inputmode="decimal" dir="ltr"')}<p class="muted small" style="margin:-6px 0 12px">${t('shareHint')}</p>
+    ${chk('active', t('active'), x.active)}${modalBtns()}</form>`);
+}
+function memberForm(id){
+  const p = S.people[id]; if(!p) return;
+  const self = p.id === S.me.id ? 'disabled' : '';
+  openModal(`<form data-form="member" novalidate><input type="hidden" name="id" value="${esc(p.id)}"><h3>${esc(p.full_name)}</h3>
+    <p class="muted small" dir="ltr" style="margin-top:-6px">${esc(showLogin(p.email))}</p>
+    ${fld('full_name', t('fullName'), p.full_name, 'maxlength="80" dir="auto"')}
+    <label class="fld"><span>${t('role')}</span><select name="role" ${self}>${['staff','owner'].map(x => opt(x, t('role_' + x), p.role)).join('')}</select></label>
+    ${chk('active', t('active'), p.active, self)}${modalBtns()}</form>`);
+}
+function staffForm(){
+  openModal(`<form data-form="staff" novalidate><h3>${t('addStaff')}</h3>
+    ${fld('full_name', t('fullName'), '', 'maxlength="80" dir="auto"')}
+    ${fld('email', t('email'), '', 'dir="ltr" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"')}
+    ${fld('password', t('newPwd'), '', 'type="text" dir="ltr" autocomplete="new-password" minlength="8"')}
+    <p class="muted small" style="margin:-6px 0 12px">${t('staffEmailHint')}</p>${modalBtns()}</form>`);
+}
+function pwdForm(id){
+  const p = S.people[id]; if(!p) return;
+  openModal(`<form data-form="pwd" novalidate><input type="hidden" name="id" value="${esc(p.id)}"><h3>${t('setPwd')}</h3>
+    <p class="muted" style="margin-top:-6px">${esc(p.full_name)} · <span dir="ltr">${esc(showLogin(p.email))}</span></p>
+    ${fld('password', t('newPwd'), '', 'type="text" dir="ltr" autocomplete="new-password" minlength="8"')}${modalBtns()}</form>`);
+}
+async function callStaffFn(body){
+  const { data, error } = await sb.functions.invoke('manage-staff', { body });
+  if(error){ let msg = error.message; try { const j = await error.context.json(); if(j && j.error) msg = j.error; } catch {} throw new Error(msg); }
+  if(data && data.error) throw new Error(data.error);
+  return data;
+}
+async function afterSettingsSave(msg){ closeModal(); toast(msg || t('saved')); await loadRefs(); rerenderMain(); }
+
+/* ================= AUDIT ================= */
+function auditSummary(r){
+  const o = r.old_data || {}, n = r.new_data || {};
+  const v = x => x === null || x === undefined || x === '' ? '—' : typeof x === 'object' ? JSON.stringify(x) : String(x);
+  if(r.table_name === 'transactions'){
+    const x = r.new_data || r.old_data || {};
+    if(r.action === 'INSERT') return `#${x.entry_no} · ${t('k_' + x.kind)} ${fmtMoney(x.amount)} · ${x.description}`;
+    if(r.action === 'UPDATE') return `#${x.entry_no} · ${t('s_' + o.status)} → ${t('s_' + n.status)}${n.decision_note && n.decision_note !== o.decision_note ? ' · ' + n.decision_note : ''}${n.void_reason && n.void_reason !== o.void_reason ? ' · ' + n.void_reason : ''}`;
+  }
+  if(r.table_name === 'day_closes') return `${fmtDate(n.close_date)}${n.note ? ' · ' + n.note : ''}`;
+  if(r.table_name === 'cash_counts') return `${nm(accById(n.account_id))}: ${t('counted')} ${fmtMoney(n.counted)} / ${t('expected')} ${fmtMoney(n.expected)}`;
+  const label = n.name || n.full_name || o.name || o.full_name || '';
+  if(r.action === 'UPDATE'){
+    const keys = Object.keys(n).filter(k => JSON.stringify(n[k]) !== JSON.stringify(o[k]));
+    return `${label}: ${keys.map(k => `${k} ${v(o[k])} → ${v(n[k])}`).join(', ')}`;
+  }
+  return label;
+}
+function auditHtml(){
+  return pageHead(t('audit'), `<button class="btn sm" data-act="reload">${ICON.refresh}${t('refresh')}</button>`)
+    + `<p class="muted small" style="margin-top:-4px">${t('auditIntro')}</p>`
+    + (S.audit.length ? `<section class="card"><ul class="rows">${S.audit.map(r => `<li class="col">
+      <div class="rowline small"><b>${bd(personName(r.actor))}</b><span class="muted">${fmtDateTime(r.at)}</span></div>
+      <div class="small"><span class="pill">${t('tbl_' + r.table_name)}</span> ${t('act_' + r.action)}</div>
+      <div class="small muted" style="overflow-wrap:anywhere;margin-top:3px">${esc(auditSummary(r))}</div></li>`).join('')}</ul></section>` : empty(t('nothing')));
+}
+
+/* ================= ACTIONS ================= */
+const ACT = {
+  go: d => { if(d.v === 'close') S.close.date = null; if(d.v === 'add') S.formFile = null; go(d.v); },
+  reload: () => go(S.view),
+  lang: () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; store.set('cf_lang', S.lang); render(); },
+  signout: async () => { await sb.auth.signOut(); },
+  recheck: () => run(loadMe),
+  modalClose: () => closeModal(),
+  kind: d => { S.form.kind = d.k; S.form.category = ''; S.form.teacher = ''; S.form.to = ''; rerenderMain(); },
+  openingStart: () => { S.form = null; resetForm(); S.form.kind = 'income'; const c = S.categories.find(x => x.system_code === 'opening_balance'); S.form.category = c ? c.id : ''; go('add'); },
+  confirmSave: () => confirmSave(),
+  confirmClose: () => confirmClose(),
+  approve: d => run(async () => { must(await sb.rpc('approve_entry', { p_id: d.id })); toast(t('approvedMsg', d.no)); await loadPending(); rerenderMain(); }),
+  reject: d => openModal(`<form data-form="reject" novalidate><input type="hidden" name="id" value="${esc(d.id)}"><input type="hidden" name="no" value="${esc(d.no)}">
+    <h3>${t('rejectTitle', esc(d.no))}</h3><p class="muted" style="margin-top:-4px">${t('rejectHint')}</p>
+    <label class="fld"><span>${t('reason')}</span><textarea name="reason" rows="3" maxlength="300"></textarea></label>
+    <div class="err" hidden></div><div class="btns"><button type="button" class="btn" data-act="modalClose">${t('cancel')}</button><button class="btn danger" type="submit">${t('reject')}</button></div></form>`),
+  void: d => openModal(`<form data-form="void" novalidate><input type="hidden" name="id" value="${esc(d.id)}"><input type="hidden" name="no" value="${esc(d.no)}">
+    <h3>${t('voidTitle', esc(d.no))}</h3><p class="muted" style="margin-top:-4px">${t('voidHint')}</p>
+    <label class="fld"><span>${t('reason')}</span><textarea name="reason" rows="3" maxlength="300"></textarea></label>
+    <div class="err" hidden></div><div class="btns"><button type="button" class="btn" data-act="modalClose">${t('cancel')}</button><button class="btn danger" type="submit">${t('voidBtn')}</button></div></form>`),
+  receipt: d => {
+    const w = window.open('', '_blank');
+    sb.storage.from('receipts').createSignedUrl(d.path, 600).then(({ data, error }) => {
+      if(error || !data){ if(w) w.close(); toast(errText(error || 'not_found'), 'err'); return; }
+      if(w) w.location.href = data.signedUrl; else location.href = data.signedUrl;
+    });
+  },
+  csv: () => exportCsv(),
+  preset: d => { S.report.from = d.from; S.report.to = d.to; refreshView(loadReport); },
+  settingsTab: d => { S.settingsTab = d.tab; rerenderMain(); },
+  editAccount: d => accountForm(d.id),
+  editCategory: d => categoryForm(d.id),
+  editTeacher: d => teacherForm(d.id),
+  editMember: d => memberForm(d.id),
+  setPwd: d => pwdForm(d.id),
+  addStaff: () => staffForm()
+};
+
+const SUBMIT = {
+  login: f => run(async () => {
+    const { data, error } = await sb.auth.signInWithPassword({ email: toLogin(f.elements.email.value), password: f.elements.password.value });
+    if(error) throw error;
+    S.user = data.user; await loadMe();
+  }, f.querySelector('.err')),
+  entry: f => submitEntry(f),
+  close: f => submitClose(f),
+  filters: f => {
+    const g = n => f.elements[n].value;
+    const from = g('from'), to = g('to');
+    if(!from || !to || from > to){ toast(t('err_bad_range'), 'err'); return; }
+    S.entries.filters = { from, to, kind: g('kind'), status: g('status'), account: g('account'), category: g('category'), q: g('q') };
+    refreshView(loadEntries);
+  },
+  range: f => {
+    const from = f.elements.from.value, to = f.elements.to.value;
+    if(!from || !to || from > to){ toast(t('err_bad_range'), 'err'); return; }
+    S.report.from = from; S.report.to = to; refreshView(loadReport);
+  },
+  reject: f => run(async () => {
+    const reason = f.elements.reason.value.trim(); if(reason.length < 3) throw new Error('reason_required');
+    must(await sb.rpc('reject_entry', { p_id: f.elements.id.value, p_note: reason }));
+    closeModal(); toast(t('rejectedMsg', f.elements.no.value)); await loadPending(); rerenderMain();
+  }, f.querySelector('.err')),
+  void: f => run(async () => {
+    const reason = f.elements.reason.value.trim(); if(reason.length < 3) throw new Error('reason_required');
+    must(await sb.rpc('void_entry', { p_id: f.elements.id.value, p_reason: reason }));
+    const no = f.elements.no.value; closeModal(); toast(t('voidedMsg', no)); await loadEntries(); rerenderMain();
+  }, f.querySelector('.err')),
+  account: f => run(async () => {
+    const e = f.elements;
+    must(await sb.rpc('upsert_account', { p_id: e.id.value || null, p_name: e.name.value, p_name_ar: e.name_ar.value, p_kind: e.kind.value,
+      p_allow_negative: e.allow_negative.checked, p_active: e.active.checked, p_sort: parseInt(e.sort_order.value, 10) || 0 }));
+    await afterSettingsSave();
+  }, f.querySelector('.err')),
+  category: f => run(async () => {
+    const e = f.elements;
+    must(await sb.rpc('upsert_category', { p_id: e.id.value || null, p_name: e.name.value, p_name_ar: e.name_ar.value, p_kind: e.kind.value,
+      p_teacher_link: e.teacher_link.value, p_owner_only: e.owner_only.checked, p_in_pnl: e.in_pnl.checked, p_active: e.active.checked,
+      p_sort: parseInt(e.sort_order.value, 10) || 0 }));
+    await afterSettingsSave();
+  }, f.querySelector('.err')),
+  teacher: f => run(async () => {
+    const e = f.elements; const share = parseAmount(e.share.value, true);
+    if(share === null || share > 100) throw new Error('share_range');
+    must(await sb.rpc('upsert_teacher', { p_id: e.id.value || null, p_name: e.name.value, p_phone: e.phone.value, p_subject: e.subject.value,
+      p_share: share, p_active: e.active.checked }));
+    await afterSettingsSave();
+  }, f.querySelector('.err')),
+  member: f => run(async () => {
+    const e = f.elements;
+    must(await sb.rpc('set_member', { p_id: e.id.value, p_full_name: e.full_name.value, p_role: e.role.value, p_active: e.active.checked }));
+    if(e.id.value === S.me.id) S.me.full_name = e.full_name.value.trim();
+    await afterSettingsSave(); render();
+  }, f.querySelector('.err')),
+  staff: f => run(async () => {
+    const e = f.elements; const name = e.full_name.value.trim(), uname = e.email.value.trim().toLowerCase(), pwd = e.password.value;
+    if(name.length < 2) throw new Error('name_required');
+    if(!validUsername(uname)) throw new Error('bad_email');
+    const email = toLogin(uname);
+    if(pwd.length < 8) throw new Error('password_short');
+    const r = await callStaffFn({ action:'create', email, password: pwd, full_name: name });
+    must(await sb.rpc('set_member', { p_id: r.id, p_full_name: name, p_role: 'staff', p_active: true }));
+    await afterSettingsSave(t('staffAdded'));
+  }, f.querySelector('.err')),
+  pwd: f => run(async () => {
+    const pwd = f.elements.password.value; if(pwd.length < 8) throw new Error('password_short');
+    await callStaffFn({ action:'set_password', user_id: f.elements.id.value, password: pwd });
+    closeModal(); toast(t('pwdSet'));
+  }, f.querySelector('.err'))
+};
+
+/* ================= EVENTS ================= */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const fn = ACT[el.dataset.act]; if(!fn) return;
+  e.preventDefault(); if(S.busy && el.dataset.act !== 'modalClose') return;
+  fn(el.dataset, el);
+});
+document.addEventListener('submit', e => {
+  const f = e.target; const fn = SUBMIT[f.dataset.form]; if(!fn) return;
+  e.preventDefault(); if(S.busy) return; fn(f);
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  const ef = el.closest('form[data-form="entry"]');
+  if(ef && S.form && el.name && el.type !== 'file'){
+    const key = { amount:'amount', date:'date', account:'account', to:'to', category:'category', teacher:'teacher', party:'party', desc:'desc', ref:'ref' }[el.name];
+    if(key) S.form[key] = el.value;
+  }
+  if(el.dataset && el.dataset.acc){ S.close.counts[el.dataset.acc] = el.value; updateCloseDiff(el.dataset.acc); }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if(el.closest('form[data-form="entry"]') && S.form){
+    if(el.name === 'file'){ S.formFile = (el.files && el.files[0]) || null; const s = el.parentElement.querySelector('[data-filename]'); if(s) s.textContent = S.formFile ? S.formFile.name : ''; return; }
+    if(el.name === 'category'){ S.form.category = el.value; S.form.teacher = ''; rerenderMain(); return; }
+    if(el.name === 'account' && S.form.kind === 'transfer'){ S.form.account = el.value; if(S.form.to === el.value) S.form.to = ''; rerenderMain(); return; }
+  }
+  if(el.name === 'closeDate' && el.value){ refreshView(() => loadClose(el.value)); }
+});
+$('#modalWrap').addEventListener('click', e => { if(e.target.id === 'modalWrap' && !S.busy) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('#modalWrap').classList.contains('open') && !S.busy) closeModal(); });
+
+/* ================= BOOT ================= */
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'SIGNED_OUT'){
+    Object.assign(S, { user:null, me:null, view:null, form:null, formFile:null, home:null, pending:[], mine:[], entries:{ filters:null, rows:[] }, audit:[], pendingCount:0 });
+    closeModal(); render();
+  }
+});
+(async function boot(){
+  applyLang();
+  $('#app').innerHTML = loadingHtml();
+  try {
+    const { data } = await sb.auth.getSession();
+    if(!data.session){ render(); return; }
+    S.user = data.session.user;
+    await loadMe();
+  } catch(e){
+    console.error(e);
+    $('#app').innerHTML = `<div class="login"><div class="card"><p class="err">${esc(errText(e))}</p><button class="btn primary block" onclick="location.reload()">${t('refresh')}</button></div></div>`;
+  }
+})();
+</script>
+</body>
+</html>
